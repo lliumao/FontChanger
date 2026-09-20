@@ -1,6 +1,5 @@
 package com.example.fontchanger
 
-import android.app.AlertDialog
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -43,7 +42,7 @@ class FloatingButtonService : Service() {
         }
 
         floatingView.setOnLongClickListener {
-            showStyleMenu()
+            openStyleMenu()
             true
         }
 
@@ -94,38 +93,26 @@ class FloatingButtonService : Service() {
         })
     }
 
-    /**
-     * Показывает системное диалоговое окно со списком стилей.
-     * Превью — на примере фразы-панграммы.
-     */
-    private fun showStyleMenu() {
-        val allStyles = FontStyle.values()
-        val labels = allStyles.map { style ->
-            val preview = FontMapper.transform(SAMPLE_PHRASE, style)
-            "${style.displayName}\n$preview"
-        }.toTypedArray()
-
-        val current = StylePrefs.getStyle(this)
-        val currentIndex = allStyles.indexOf(current)
-
-        AlertDialog.Builder(this)
-            .setTitle("Выбери стиль")
-            .setSingleChoiceItems(labels, currentIndex) { dialog, which ->
-                StylePrefs.setStyle(this, allStyles[which])
-                dialog.dismiss()
+    private fun openStyleMenu() {
+        try {
+            val intent = Intent(this, StyleMenuActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
-            .setNegativeButton("Отмена", null)
-            .show()
+            startActivity(intent)
+        } catch (e: Exception) {
+            // Игнорируем ошибку запуска, сервис продолжит работу
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (::floatingView.isInitialized) {
-            windowManager.removeView(floatingView)
+            try {
+                windowManager.removeView(floatingView)
+            } catch (e: Exception) {
+                // View уже удалён
+            }
         }
-    }
-
-    companion object {
-        private const val SAMPLE_PHRASE = "Съешь ещё этих мягких французских булочек, да выпей чаю"
     }
 }
