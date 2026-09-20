@@ -59,10 +59,10 @@ class MyAccessibilityService : AccessibilityService() {
     }
 
     private fun pasteViaClipboard(node: AccessibilityNodeInfo, text: String): Boolean {
-        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        cm.setPrimaryClip(ClipData.newPlainText("font", text))
-        node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
-        node.performAction(AccessibilityNodeInfo.ACTION_SELECT_ALL)
-        return node.performAction(AccessibilityNodeInfo.ACTION_PASTE)
+    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    cm.setPrimaryClip(ClipData.newPlainText("font", text))
+    node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+    node.performAction(AccessibilityNodeInfo.ACTION_SELECT) // выделить всё содержимое
+    return node.performAction(AccessibilityNodeInfo.ACTION_PASTE)
     }
 }
