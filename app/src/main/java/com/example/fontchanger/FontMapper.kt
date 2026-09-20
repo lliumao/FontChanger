@@ -1,5 +1,26 @@
 package com.example.fontchanger
 
+import com.example.fontchanger.fonts.Style1_Flowing
+import com.example.fontchanger.fonts.Style2_Glyphs
+import com.example.fontchanger.fonts.Style3_Coptic
+import com.example.fontchanger.fonts.Style4_Canadian
+import com.example.fontchanger.fonts.Style5_Runes
+import com.example.fontchanger.fonts.Style6_Ethiopic
+import com.example.fontchanger.fonts.Style7_Greek
+import com.example.fontchanger.fonts.Style8_Chinese
+
+enum class FontStyle(val displayName: String) {
+    SMALL_CAPS("Small Caps (по умолчанию)"),
+    FLOWING("Flowing Script"),
+    GLYPHS("Glyphs"),
+    COPTIC("Коптский"),
+    CANADIAN("Канадский слог"),
+    RUNES("Руны"),
+    ETHIOPIC("Эфиопия"),
+    GREEK("Greek"),
+    CHINESE("Chinese")
+}
+
 object FontMapper {
 
     private val smallCaps = mapOf(
@@ -24,10 +45,23 @@ object FontMapper {
         'z' to 'ᴢ'
     )
 
-    fun toSmallCaps(input: String): String {
+    fun getMap(style: FontStyle): Map<Char, Char> = when (style) {
+        FontStyle.SMALL_CAPS -> smallCaps
+        FontStyle.FLOWING -> Style1_Flowing.map
+        FontStyle.GLYPHS -> Style2_Glyphs.map
+        FontStyle.COPTIC -> Style3_Coptic.map
+        FontStyle.CANADIAN -> Style4_Canadian.map
+        FontStyle.RUNES -> Style5_Runes.map
+        FontStyle.ETHIOPIC -> Style6_Ethiopic.map
+        FontStyle.GREEK -> Style7_Greek.map
+        FontStyle.CHINESE -> Style8_Chinese.map
+    }
+
+    fun transform(input: String, style: FontStyle): String {
+        val map = getMap(style)
         val sb = StringBuilder()
         for (ch in input) {
-            sb.append(smallCaps[ch] ?: ch)
+            sb.append(map[ch] ?: ch)
         }
         return sb.toString()
     }
