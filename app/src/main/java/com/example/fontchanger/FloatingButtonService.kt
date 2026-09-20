@@ -1,5 +1,6 @@
 package com.example.fontchanger
 
+import android.app.AlertDialog
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -41,12 +42,18 @@ class FloatingButtonService : Service() {
             MyAccessibilityService.instance?.transformFocusedText()
         }
 
+        floatingView.setOnLongClickListener {
+            showStyleMenu()
+            true
+        }
+
         floatingView.setOnTouchListener(object : View.OnTouchListener {
             private var initialX = 0
             private var initialY = 0
             private var touchX = 0f
             private var touchY = 0f
             private var moved = false
+            private var downTime = 0L
 
             override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.action) {
@@ -56,6 +63,7 @@ class FloatingButtonService : Service() {
                         touchX = event.rawX
                         touchY = event.rawY
                         moved = false
+                        downTime = System.currentTimeMillis()
                         return false
                     }
                     MotionEvent.ACTION_MOVE -> {
@@ -70,7 +78,14 @@ class FloatingButtonService : Service() {
                         return moved
                     }
                     MotionEvent.ACTION_UP -> {
-                        if (!moved) v.performClick()
+                        val heldTime = System.currentTimeMillis() - downTime
+                        if (!moved) {
+                            if (heldTime < 500) {
+                                v.performClick()
+                            } else {
+                                v.performLongClick()
+                            }
+                        }
                         return true
                     }
                 }
@@ -79,10 +94,38 @@ class FloatingButtonService : Service() {
         })
     }
 
+    /**
+     * Показывает системное диалоговое окно со списком стилей.
+     * Превью — на примере фразы-панграммы.
+     */
+    private fun showStyleMenu() {
+        val allStyles = FontStyle.values()
+        val labels = allStyles.map { style ->
+            val preview = FontMapper.transform(SAMPLE_PHRASE, style)
+            "${style.displayName}\n$preview"
+        }.toTypedArray()
+
+        val current = StylePrefs.getStyle(this)
+        val currentIndex = allStyles.indexOf(current)
+
+        AlertDialog.Builder(this)
+            .setTitle("Выбери стиль")
+            .setSingleChoiceItems(labels, currentIndex) { dialog, which ->
+                StylePrefs.setStyle(this, allStyles[which])
+                dialog.dismiss()
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (::floatingView.isInitialized) {
             windowManager.removeView(floatingView)
         }
+    }
+
+    companion object {
+        private const val SAMPLE_PHRASE = "Съешь ещё этих мягких французских булочек, да выпей чаю"
     }
 }
