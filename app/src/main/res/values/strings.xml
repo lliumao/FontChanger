@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FontChanger</string>
+    <string name="accessibility_description">Позволяет менять шрифт в поле ввода других приложений по нажатию плавающей кнопки.</string>
+</resources>
