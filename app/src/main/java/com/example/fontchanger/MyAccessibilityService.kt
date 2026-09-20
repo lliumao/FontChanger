@@ -34,7 +34,8 @@ class MyAccessibilityService : AccessibilityService() {
         val original = node.text?.toString()
         if (original.isNullOrEmpty()) return false
 
-        val transformed = FontMapper.toSmallCaps(original)
+        val style = StylePrefs.getStyle(this)
+        val transformed = FontMapper.transform(original, style)
 
         val args = Bundle()
         args.putCharSequence(
